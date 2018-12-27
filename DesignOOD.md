@@ -66,13 +66,61 @@ class HitCounter {
     }
 }
 ```
+348. Design Tic-Tac-Toe
+
+Row array and col array to save space. Two diagnal lines.
+1 and -1 to indicate two players to save space.
+
+```java
+class TicTacToe {
+    
+    int leftDiag;
+    int rightDiag;
+    int[] rows;
+    int[] cols;
+    int n;
+
+    /** Initialize your data structure here. */
+    public TicTacToe(int n) {
+        leftDiag = 0;
+        rightDiag = 0;
+        rows = new int[n];
+        cols = new int[n];
+        this.n = n;
+    }
+    
+    /** Player {player} makes a move at ({row}, {col}).
+        @param row The row of the board.
+        @param col The column of the board.
+        @param player The player, can be either 1 or 2.
+        @return The current winning condition, can be either:
+                0: No one wins.
+                1: Player 1 wins.
+                2: Player 2 wins. */
+    public int move(int row, int col, int player) {
+        int m = player == 1 ? 1 : -1;
+        rows[row] += m;
+        cols[col] += m;
+        if (row == col) {
+            leftDiag += m;
+        }
+        if (row + col == n - 1) {
+            rightDiag += m;
+        }
+        if (Math.abs(rows[row]) == n || Math.abs(cols[col]) == n || Math.abs(leftDiag) == n || Math.abs(rightDiag) == n) {
+            return player;
+        }
+        return 0;
+    }
+}
+```
 
 array solution :
 
 355. Design Twitter
 
 User class, Tweet class. Use a minimum heap to keep most recent 10 tweets.
-Or we can use tweet as node to keep a next instead of keep a list in user.
+Or we can use tweet as node to keep a next instead of keeping a list in user.
 
 ```java
 class Twitter {
@@ -170,6 +218,130 @@ class Twitter {
             return;
         }
         userMap.get(followerId).follows.remove(userMap.get(followeeId));
+    }
+}
+```
+
+353. Design Snake Game
+
+Check eat food first to save time. Use integer in set.
+
+```java
+class SnakeGame {
+    
+    Deque<int[]> dq = new LinkedList<>();
+    Set<Integer> body = new HashSet<>();
+    int width;
+    int height;
+    int[][] food;
+    int foodIdx;
+
+    /** Initialize your data structure here.
+        @param width - screen width
+        @param height - screen height 
+        @param food - A list of food positions
+        E.g food = [[1,1], [1,0]] means the first food is positioned at [1,1], the second is at [1,0]. */
+    public SnakeGame(int width, int height, int[][] food) {
+        this.food = food;
+        this.width = width;
+        this.height = height;
+        int[] start = new int[]{0, 0};
+        body.add(start[0] * width + start[1]);
+        dq.offerLast(start);
+        foodIdx = 0;
+    }
+    
+    /** Moves the snake.
+        @param direction - 'U' = Up, 'L' = Left, 'R' = Right, 'D' = Down 
+        @return The game's score after the move. Return -1 if game over. 
+        Game over when snake crosses the screen boundary or bites its body. */
+    public int move(String direction) {
+        int[] cur = dq.peekFirst();
+        int[] next = new int[2];
+        next[0] = cur[0];
+        next[1] = cur[1];
+        if (direction.equals("U")) {
+            next[0]--;
+        }
+        else if (direction.equals("L")) {
+            next[1]--;
+        }
+        else if (direction.equals("R")) {
+            next[1]++;
+        }
+        else if (direction.equals("D")) {
+            next[0]++;
+        }
+        if (foodIdx < food.length && next[0] == food[foodIdx][0] && next[1] == food[foodIdx][1]) {
+            foodIdx++;
+            dq.offerFirst(next); 
+            body.add(next[0] * width + next[1]);
+            return foodIdx;
+        }
+        if (!inBound(next)) {
+            return -1;
+        }        
+        int[] tail = dq.peekLast();        
+        if (tail[0] == next[0] && tail[1] == next[1]) {
+
+        }
+        else if (body.contains(next[0] * width + next[1])) {
+            return -1;
+        }        
+        dq.offerFirst(next);        
+        dq.pollLast();
+        body.remove(tail[0] * width + tail[1]);
+        body.add(next[0] * width + next[1]); 
+        return foodIdx;
+    }
+    
+    public boolean inBound(int[] pos) {
+        return pos[0] >= 0 && pos[0] < height && pos[1] >= 0 && pos[1] < width;
+    }
+}
+```
+
+379. Design Phone Directory
+
+Queue + Set
+
+```java
+class PhoneDirectory {
+    
+    Deque<Integer> dq = new LinkedList<>();
+    Set<Integer> set = new HashSet<>();
+
+    /** Initialize your data structure here
+        @param maxNumbers - The maximum numbers that can be stored in the phone directory. */
+    public PhoneDirectory(int maxNumbers) {
+        for (int i = 0; i < maxNumbers; i++) {
+            dq.offerLast(i);
+        }
+    }
+    
+    /** Provide a number which is not assigned to anyone.
+        @return - Return an available number. Return -1 if none is available. */
+    public int get() {
+        if (dq.size() == 0) {
+            return -1;
+        }
+        int res = dq.pollFirst();
+        set.add(res);
+        return res;
+    }
+    
+    /** Check if a number is available or not. */
+    public boolean check(int number) {
+        return !set.contains(number);
+    }
+    
+    /** Recycle or release a number. */
+    public void release(int number) {
+        if (!set.contains(number)) {
+            return;
+        }
+        set.remove(number);
+        dq.offerLast(number);
     }
 }
 ```
