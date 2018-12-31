@@ -155,6 +155,29 @@ Iterative, traverse the tree to find the parent of nodes, then store them in a m
     }
 ```
 
+input is a list of nodes
+
+```java
+public TreeNode lowestCommonAncestor(TreeNode root, List<TreeNode> nodes) {
+	Map<TreeNode, TreeNode> parent = new HashMap<>();
+	Stack<TreeNode> st = new Stack<>();
+	st.push(root);
+	while(!st.isEmpty()) {
+		TreeNode cur = st.pop();
+		if(cur.left != null) {
+			map.put(cur.left, cur);
+			st.push(cur.left);
+		}
+		if(cur.right != null) {
+			map.put(cur.right, cur);
+			st.push(cur.right);
+		}
+	}
+	
+}
+
+```
+
 LCA of Deepest Node
 
 
@@ -353,6 +376,37 @@ Two queue and one map. O(n)
         List<List<Integer>> res = new ArrayList<>();
         for (int i = min; i <= max; i++) {
             res.add(map.get(i));
+        }
+        return res;
+    }
+```
+
+199. Binary Tree Right Side View
+
+level order traversal
+
+```java
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        if(root == null){
+            return res;
+        }
+        q.offer(root);
+        while(!q.isEmpty()){
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = q.poll();
+                if (i == size - 1) {
+                    res.add(cur.val);
+                }
+                if (cur.left != null) {
+                    q.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    q.offer(cur.right);
+                }
+            }
         }
         return res;
     }
@@ -782,6 +836,57 @@ Collections can store null.
     }
 ```
 
+## Modify tree structure
+
+114. Flatten Binary Tree to Linked List
+
+Recursive, worse case O(n^2).
+
+```java
+    public void flatten(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+        flatten(root.left);
+        flatten(root.right);
+        root.left = null;
+        root.right = left;
+        TreeNode cur = root;
+        while (cur.right != null) {
+            cur = cur.right;
+        }
+        cur.right = right;s        
+    }
+```
+
+117. Populating Next Right Pointers in Each Node II
+
+Use a dummy node. It's like build up a linked list for each level.
+
+```java
+public void connect(TreeLinkNode root) {
+    while (root != null) {
+        TreeLinkNode dummy = new TreeLinkNode(0);
+        TreeLinkNode cur = dummy;
+        while (root != null) {
+            if (root.left != null) {
+                cur.next = root.left;
+                cur = cur.next;
+            }
+            if (root.right != null) {
+                cur.next = root.right;
+                cur = cur.next;
+            }
+            root = root.next;
+        }
+        root = dummy.next;
+    }
+}
+
+```
+
 257. Binary Tree Paths
 
 ```java
@@ -808,6 +913,44 @@ Collections can store null.
         sb.setLength(len);
     }
 ```
+426. Convert Binary Search Tree to Sorted Doubly Linked List
+
+Iterative
+
+```java
+    Node prev = null;
+    Node head = null;
+    
+    public Node treeToDoublyList(Node root) {
+        if (root == null) {
+            return root;
+        }
+        Stack<Node> st = new Stack<>();
+        Node cur = root;
+        while (cur != null || !st.isEmpty()) {
+            while (cur != null) {
+                st.push(cur);
+                cur = cur.left;
+            }
+            cur = st.pop();
+            if (head == null) {
+                head = cur;
+            }
+            else {
+                prev.right = cur;
+                cur.left = prev;
+            }
+            prev = cur;
+            cur = cur.right;
+        }
+        prev.right = head;
+        head.left = prev;
+        return head;
+    }
+```
+
+Recursive
+
 112. Path Sum
 
 Check whether current node is leaf node.
@@ -824,4 +967,157 @@ Check whether current node is leaf node.
         return hasPathSum(root.left, sum) || hasPathSum(root.right, sum);
     }
 ```
+
+113. Path Sum II
+
+Use dfs to traverse all possible paths. Check whether current node is leaf node(Don't add current list when current node is null since it will cause duplicate where leaf node has two null child!). Remember to remove last value before backtracking. O(n)!! Each node is processed once.
+
+```java
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+        List<List<Integer>> res = new ArrayList<>();
+        helper(res, root, sum, new ArrayList<Integer>());
+        return res;
+    }
+    
+    public void helper(List<List<Integer>> res, TreeNode root, int sum, List<Integer> cur) {
+        if (root == null) {
+            return;
+        }
+        sum -= root.val;
+        cur.add(root.val);
+        if (sum == 0 && root.left == null && root.right == null) {
+            res.add(new ArrayList<Integer>(cur));
+            cur.remove(cur.size() - 1);
+            return;
+        }
+        helper(res, root.left, sum, cur);
+        helper(res, root.right, sum, cur);
+        cur.remove(cur.size() - 1);
+        return;
+    }
+```
+
+437. Path Sum III
+
+pathSumFrom means we start counting value from this node. The solution is like two pointer, the length of this "array" is the height of tree. So worse case O(n^2), best case O(nlogn). Space O(n^2).
+
+```java
+    public int pathSum(TreeNode root, int sum) {
+        if (root == null) {
+            return 0;
+        }
+        return pathSumFrom(root, sum) + pathSum(root.left, sum) + pathSum(root.right, sum);
+    }
+    
+    public int pathSumFrom(TreeNode node, int sum) {
+        if (node == null) {
+            return 0;
+        }
+        return (node.val == sum ? 1 : 0) + pathSumFrom(node.left, sum - node.val) + pathSumFrom(node.right, sum - node.val);
+    }
+```
+
+297. Serialize and Deserialize Binary Tree
+
+Preorder traversal(the root can get its children directly), then use queue to rebuild. O(n).
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder sb = new StringBuilder();
+        serializeHelper(root, sb);
+        return sb.toString();
+    }
+    
+    public void serializeHelper(TreeNode node, StringBuilder sb) {
+        if (node == null) {
+            sb.append("n").append(",");
+            return;
+        }
+        sb.append(node.val).append(",");
+        serializeHelper(node.left, sb);
+        serializeHelper(node.right, sb);
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String[] sp = data.split(",");
+        Queue<String> q = new LinkedList<String>(Arrays.asList(sp));
+        return deserializeHelper(q);
+    }
+    
+    public TreeNode deserializeHelper(Queue<String> q) {
+        String cur = q.poll();
+        if (cur.equals("n")) {
+            return null;
+        }
+        TreeNode root = new TreeNode(Integer.parseInt(cur));
+        root.left = deserializeHelper(q);
+        root.right = deserializeHelper(q);
+        return root;
+    }
+}
+```
+
+
+129. Sum Root to Leaf Numbers
+
+Need to check whether current node is leaf node. O(n).
+
+```java
+    int count = 0;
+    public int sumNumbers(TreeNode root) {
+        helper(root, 0);
+        return count;
+    }
+    
+    public void helper(TreeNode root, int cur) {
+        if (root == null) {
+            return;
+        }
+        cur = cur * 10 + root.val;
+        if (root.left == null && root.right == null) {
+            count += cur;
+        }
+        helper(root.left, cur);
+        helper(root.right, cur);
+    }
+```
+
+298. Binary Tree Longest Consecutive Sequence
+
+dfs, O(n).
+
+```java
+    int max = 1;
+    
+    public int longestConsecutive(TreeNode root) {
+        if(root == null) {
+            return 0;
+        }
+        helper(root.left, 1, root.val);
+        helper(root.right, 1, root.val);
+        return max;
+    }
+    
+    public void helper(TreeNode node, int cur, int prev) {
+        if (node == null) {
+            return;
+        }
+        if (node.val == prev + 1) {
+            cur++;
+            max = Math.max(max, cur);
+            helper(node.left, cur, node.val);
+            helper(node.right, cur, node.val);
+        }
+        else {
+            helper(node.left, 1, node.val);
+            helper(node.right, 1, node.val);
+        }
+    }
+```
+
+
 
