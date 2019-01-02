@@ -951,6 +951,8 @@ Iterative
 
 Recursive
 
+
+
 112. Path Sum
 
 Check whether current node is leaf node.
@@ -1117,6 +1119,16 @@ dfs, O(n).
             helper(node.right, 1, node.val);
         }
     }
+```
+
+364. Nested List Weight Sum II
+
+1. DFS, Find maxdepth, then sum += (maxdepth - curdepth) * val
+
+2. BFS, double previous result at the end of each level.
+
+```java
+
 ```
 
 
