@@ -1511,4 +1511,23 @@ We reuse the previous result, so we loop through from m to 0.
     }
 ```
 
+[279. Perfect Squares](https://leetcode.com/problems/perfect-squares/description/)
+
+Like back pack. For each size, chech we can get a smaller number if we subtrack a square number.
+
+```java
+    public int numSquares(int n) {
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        for (int j = 1; j <= n; j++) {
+            for (int i = 1; i * i <= j; i++) {
+                dp[j] = Math.min(dp[j], dp[j - i * i] + 1);
+            }
+        }
+        return dp[n];
+    }
+```
+
+
 
