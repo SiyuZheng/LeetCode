@@ -62,3 +62,68 @@ Third: HashSet
         return max;
     }
 ```
+
+[438. Find All Anagrams in a String](https://leetcode.com/problems/find-all-anagrams-in-a-string/description/)
+
+```java
+    public List<Integer> findAnagrams(String s, String p) {
+        int len = p.length();
+        Map<Character, Integer> map = new HashMap<>();
+        for (int i = 0; i < p.length(); i++) {
+            char c = p.charAt(i);
+            map.put(c, map.getOrDefault(c, 0) + 1);
+        }
+        int left = 0;
+        int right = 0;
+        int counter = map.size();
+        List<Integer> res = new ArrayList<>();
+        while(right < s.length()) {
+            char cr = s.charAt(right);
+            if (map.containsKey(cr)) {
+                map.put(cr, map.get(cr) - 1);
+                if (map.get(cr) == 0) {
+                    counter--;
+                }   
+            }
+            
+            if (right >= len - 1) {
+                if (counter == 0) {
+                    res.add(left);
+                }
+                char cl = s.charAt(left);
+                if (map.containsKey(cl)) {
+                    map.put(cl, map.get(cl) + 1);
+                    if (map.get(cl) == 1) {
+                        counter++;
+                    }
+                }               
+                left++; 
+            }
+            right++;
+        }
+        return res;
+    }
+```
+
+[763. Partition Labels](https://leetcode.com/problems/partition-labels/description/)
+
+```java
+    public List<Integer> partitionLabels(String S) {
+        List<Integer> lst = new ArrayList<>();
+        int[] hash = new int[26];
+        for (int i = 0; i < S.length(); i++) {
+            hash[S.charAt(i) - 'a'] = i;
+        }
+        int start = 0;
+        int end = 0;
+        for (int i = 0; i < S.length(); i++) {
+            end = Math.max(end, hash[S.charAt(i) - 'a']);
+            if (end == i) {
+                lst.add(end - start + 1);
+                start = end + 1;
+            }
+        }
+        return lst;
+    }
+```
+
