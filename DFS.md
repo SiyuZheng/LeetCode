@@ -171,35 +171,6 @@ left means how many left perenthesis we still need to use.
     }
 ```
 
-[17. Letter Combinations of a Phone Number](https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/)
-
-```java
-    public List<String> letterCombinations(String digits) {
-        List<String> ans = new ArrayList<String>();
-        if(digits.length() == 0){
-            return ans;
-        }
-        String[] map = new String[]{"0", "1", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        helper(ans, digits, new StringBuilder(), map);
-        return ans;
-    }
-    
-    public void helper(List<String> ans, String digits, StringBuilder sb, String[] map){
-        if (sb.length() == digits.length()) {
-            ans.add(sb.toString());
-            return;
-        }
-        int len = sb.length();
-        String mapstr = map[digits.charAt(len) - '0'];
-        
-        for (int j = 0; j < mapstr.length(); j++) {
-            sb.append(mapstr.charAt(j));
-            helper(ans, digits, sb, map);
-            sb.setLength(len);
-        }
-    }
-```
-
 [93. Restore IP Addresses](https://leetcode.com/problems/restore-ip-addresses/description/)
 
 ```java
@@ -823,5 +794,171 @@ O(4^(n - 1)). or O(n * 4 ^(n - 1)) ?
                 sb.setLength(len);
             }
         }
+    }
+```
+
+[291. Word Pattern II](https://leetcode.com/problems/word-pattern-ii/description/)
+
+Use a map for previous mapping, and a set for all used string in str. (We cannot map differnt char to the same string)
+
+The end state is when both two pointers reach the end of pattern and str.
+
+```java
+    public boolean wordPatternMatch(String pattern, String str) {
+        Map<Character, String> map = new HashMap<>();
+        Set<String> set = new HashSet<>();
+        return helper(pattern, str, 0, 0, map, set);
+    }
+    
+    public boolean helper(String pattern, String str, int i1, int i2, Map<Character, String> map, Set<String> set) {
+        if (i1 == pattern.length() && i2 == str.length()) {
+            return true;
+        }
+        if (i1 >= pattern.length() || i2 >= str.length()) {
+            return false;
+        }
+        char c = pattern.charAt(i1);
+        if (map.containsKey(c)) {
+            String prev = map.get(c);
+            if (i2 + prev.length() <= str.length() && str.substring(i2, i2 + prev.length()).equals(prev)) {
+                return helper(pattern, str, i1 + 1, i2 + prev.length(), map, set);
+            }
+            else {
+                return false;
+            }
+        }
+        for (int i = i2 + 1; i <= str.length(); i++) {
+            String sub = str.substring(i2, i);
+            if (set.contains(sub)) {
+                continue;
+            }
+            map.put(c, sub);
+            set.add(sub);
+            if (helper(pattern, str, i1 + 1, i, map, set)) {
+                return true;
+            }
+            map.remove(c);
+            set.remove(sub);
+        }
+        return false;
+    }
+```
+
+[17. Letter Combinations of a Phone Number](https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/)
+
+```java
+    public List<String> letterCombinations(String digits) {
+        List<String> ans = new ArrayList<String>();
+        if(digits.length() == 0){
+            return ans;
+        }
+        String[] map = new String[]{"0", "1", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        helper(ans, digits, new StringBuilder(), map);
+        return ans;
+    }
+    
+    public void helper(List<String> ans, String digits, StringBuilder sb, String[] map){
+        if (sb.length() == digits.length()) {
+            ans.add(sb.toString());
+            return;
+        }
+        int len = sb.length();
+        String mapstr = map[digits.charAt(len) - '0'];
+        
+        for (int j = 0; j < mapstr.length(); j++) {
+            sb.append(mapstr.charAt(j));
+            helper(ans, digits, sb, map);
+            sb.setLength(len);
+        }
+    }
+```
+
+[401. Binary Watch](https://leetcode.com/problems/binary-watch/description/)
+
+I don't know why i will get duplicate if i don't use hashset, Will update it later.
+
+bit manipulation, hours is the bit left to 6 bits.
+
+
+```java
+    public List<String> readBinaryWatch(int num) {
+        Set<String> res = new HashSet<>();
+        helper(res, 0, num, 0);
+        return new ArrayList<String>(res);
+    }
+    
+    public void helper(Set<String> res, int ind, int num, int cur) {
+        if (num == 0) {
+            int min = cur & 0x0000003f;
+            int hour = cur >> 6;
+            if (hour < 12 && min < 60) {
+                res.add(hour + ":" + (min < 10 ? "0" : "") + min);
+            }
+            return;
+        }
+        for (int i = ind; i < 10; i++) {
+            if ((cur & (1 << i)) == 0) {
+                helper(res, ind + 1, num - 1, cur + (1 << i));
+            }
+        }
+    }
+```
+
+## Memory Search 
+
+Most problem in dp.
+
+[241. Different Ways to Add Parentheses](https://leetcode.com/problems/different-ways-to-add-parentheses/description/)
+
+Add the integer value, when there is no operator.
+Use map to keep track of previous result.
+
+```java
+    public List<Integer> diffWaysToCompute(String input) {
+        Map<String, List<Integer>> map = new HashMap<>();
+        return dfs(map, input);
+    }
+    
+    public List<Integer> dfs(Map<String, List<Integer>> map, String input) {
+        List<Integer> res = new ArrayList<>();
+        if (input.length() == 0) {
+            return res;
+        }
+        if (map.containsKey(input)) {
+            return map.get(input);
+        }
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (!Character.isDigit(c)) {
+                List<Integer> prevRes = dfs(map, input.substring(0, i));
+                List<Integer> nextRes = dfs(map, input.substring(i + 1));
+                if (c == '+') {
+                    for (int p : prevRes) {
+                        for (int n : nextRes) {
+                            res.add(p + n);
+                        }
+                    }
+                }
+                else if (c == '-') {
+                    for (int p : prevRes) {
+                        for (int n : nextRes) {
+                            res.add(p - n);
+                        }
+                    }
+                }
+                else if (c == '*') {
+                    for (int p : prevRes) {
+                        for (int n : nextRes) {
+                            res.add(p * n);
+                        }
+                    }
+                }
+            }
+        }
+        if (res.size() == 0) {
+            res.add(Integer.parseInt(input));
+        }
+        map.put(input, res);
+        return res;
     }
 ```

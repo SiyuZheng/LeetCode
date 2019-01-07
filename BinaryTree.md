@@ -1132,4 +1132,41 @@ dfs, O(n).
 ```
 
 
+[246. Binary Tree Path Sum II](https://www.lintcode.com/problem/binary-tree-path-sum-ii/description)
+
+Keep a list from root to current node, then substract one be one level(lst.size() - 1) to find whether the sum is equal to target. 
+
+
+```java
+    public List<List<Integer>> binaryTreePathSum2(TreeNode root, int target) {
+        // write your code here
+        List<List<Integer>> res = new ArrayList<>();
+        helper(target, new ArrayList<Integer>(), res, root);
+        return res;
+    }
+    
+    public void helper(int target, List<Integer> lst, List<List<Integer>> res, TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        lst.add(root.val);
+        int temp = target;
+        for (int j = lst.size() - 1; j >= 0; j--) {
+            temp -= lst.get(j);
+            if (temp == 0) {
+                List<Integer> subres = new ArrayList<>();
+                for (int i = j; i < lst.size(); i++) {
+                    subres.add(lst.get(i));
+                }
+                res.add(subres);
+            }
+        }
+        
+        helper(target, lst, res, root.left);
+        helper(target, lst, res, root.right);
+        lst.remove(lst.size() - 1);
+    }
+```
+
+
 

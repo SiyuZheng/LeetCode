@@ -1530,4 +1530,66 @@ Like back pack. For each size, chech we can get a smaller number if we subtrack 
 ```
 
 
+[322. Coin Change](https://leetcode.com/problems/coin-change/description/)
+
+dp[i] means the minimum number we can use to reach i. 
+
+Loop through coins first to avoid duplicate. 
+
+```java
+    public int coinChange(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+        for (int j = 0; j < coins.length; j++) {
+            for (int i = 0; i <= amount; i++) {
+                if (i - coins[j] >= 0 && dp[i - coins[j]] != Integer.MAX_VALUE) {
+                    dp[i] = Math.min(dp[i - coins[j]] + 1, dp[i]);
+                }
+            }
+        }
+        return dp[amount] == Integer.MAX_VALUE ? -1 : dp[amount];    
+    }
+```
+
+[518. Coin Change 2](https://leetcode.com/problems/coin-change-2/description/)
+
+Since the "1 + 2" and "2 + 1" is duplicate, so we have to loop through those coins in outer loop.
+
+```java
+    public int change(int amount, int[] coins) {
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+        for (int j = 0; j < coins.length; j++) {
+            for (int i = 0; i <= amount; i++) {
+                if (i + coins[j] <= amount) {
+                    dp[i + coins[j]] += dp[i];
+                }
+            }
+        }
+        return dp[amount];
+    }
+```
+
+[440. Backpack III
+](https://www.lintcode.com/problem/backpack-iii/description)
+
+dp[j] means with size j the max value we can get. 
+Outer loop is the size of item. So it means using first i items the max value we can get.
+
+```java
+    public int backPackIII(int[] A, int[] V, int m) {
+        // write your code here
+        int[] dp = new int[m + 1];
+        for (int i = 0; i < A.length; i++) {
+            for (int j = 0; j <= m; j++) {
+                if (j + A[i] <= m) {
+                    dp[j + A[i]] = Math.max(dp[j + A[i]], dp[j] + V[i]);
+                }
+            }
+        }
+        return dp[m];
+    }
+```
+
 
